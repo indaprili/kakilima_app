@@ -28,4 +28,18 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
-    - assets/
+    - assets/alfamart.png
+    - assets/bank.png
+    - assets/bca.png
+    - assets/bri.png
+    - assets/indomaret.png
+    - assets/lawson.png
+    - assets/logo_kakilima.png
+    - assets/map_style.json
+    - assets/mandiri.png
+    - assets/maybank.png
+    - assets/profile_image.jpg
+    - assets/profil.jpg
+    - assets/warteg_bahari1.jpg
+    - assets/warteg_bahari2.jpg
+    - assets/warteg_bahari3.jpg

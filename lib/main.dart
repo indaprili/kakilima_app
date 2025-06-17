@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'login_page.dart';
+
+import 'splash_screen.dart'; // Import splash screen
 
 void main() {
-  runApp(const KakiLimaApp());                                                                                                                                                      
+  runApp(const KakiLimaApp());
 }
 
 class KakiLimaApp extends StatelessWidget {
@@ -16,9 +17,11 @@ class KakiLimaApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primarySwatch: Colors.purple,
-        textTheme: GoogleFonts.poppinsTextTheme(Theme.of(context).textTheme),
+        textTheme: GoogleFonts.poppinsTextTheme(
+          Theme.of(context).textTheme,
+        ),
       ),
-      home: const LoginPage(),
+      home: const SplashScreen(), // Ganti dari LoginPage ke SplashScreen
     );
   }
 }

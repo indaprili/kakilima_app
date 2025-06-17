@@ -8,6 +8,7 @@ import 'pesan_page.dart';
 import 'topup_dompet.dart';
 import 'favorit_page.dart';
 import 'qris_scanner_page.dart';
+import 'profile_page.dart';
 
 class HomepageScreen extends StatefulWidget {
   const HomepageScreen({super.key});
@@ -177,14 +178,18 @@ class _HomepageScreenState extends State<HomepageScreen> {
         children: [
           Row(
             children: [
-              ClipOval(
-                child: Image.asset(
-                  'assets/profile_image.png',
-                  width: 40,
-                  height: 40,
-                  fit: BoxFit.cover,
-                  errorBuilder:
-                      (context, error, stackTrace) => const Icon(Icons.error),
+              InkWell(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => ProfilePage()),
+                  );
+                },
+                customBorder: const CircleBorder(),
+                child: const Icon(
+                  Icons.account_circle,
+                  size: 44,
+                  color: Color(0xFF7B2CBF),
                 ),
               ),
               const SizedBox(width: 16),
