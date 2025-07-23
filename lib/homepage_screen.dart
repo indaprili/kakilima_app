@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter/services.dart'; 
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
+
 import 'full_map_screen.dart';
 import 'riwayat_page.dart';
 import 'kategori.dart';
@@ -18,12 +20,11 @@ class HomepageScreen extends StatefulWidget {
 }
 
 class _HomepageScreenState extends State<HomepageScreen> {
-  final LatLng _initialLocation = const LatLng(-7.250445, 112.768845);
-  // _selectedIndex sekarang akan langsung mencerminkan indeks BottomNavigationBar yang sedang aktif
+  // Koordinat awal untuk peta di homepage (contoh: Surabaya)
+  final LatLng _initialLocation = const LatLng(-7.2575, 112.7521); // Koordinat Surabaya
+
   int _selectedIndex = 0;
 
-  // Daftar widget halaman yang sebenarnya akan ditampilkan di IndexedStack.
-  // Q-RIS tidak ada di sini karena akan navigasi ke halaman terpisah.
   late final List<Widget> _actualPageWidgets = <Widget>[
     _buildHomepageContent(), // Indeks 0: Beranda
     const PesanPage(), // Indeks 1: Kotak masuk
@@ -31,36 +32,25 @@ class _HomepageScreenState extends State<HomepageScreen> {
     const FavoritPage(), // Indeks 3: Favorit (akan dipetakan dari indeks 4 BNB)
   ];
 
-  // Fungsi bantu untuk mendapatkan indeks halaman yang benar untuk IndexedStack
-  // berdasarkan indeks yang dipilih di BottomNavigationBar.
   int _getPageIndexForIndexedStack(int bottomNavIndex) {
     if (bottomNavIndex == 0) {
-      // Beranda (BNB index 0)
-      return 0; // -> _actualPageWidgets[0]
+      return 0;
     } else if (bottomNavIndex == 1) {
-      // Kotak masuk (BNB index 1)
-      return 1; // -> _actualPageWidgets[1]
+      return 1;
     } else if (bottomNavIndex == 2) {
-      // Q-RIS (BNB index 2) - ini adalah tombol navigasi, bukan halaman di IndexedStack
-      // Jika tombol Q-RIS ditekan, kita tidak menampilkan halaman baru di IndexedStack.
-      // Kita akan menavigasi ke halaman QrisScannerPage.
-      // Untuk tujuan tampilan IndexedStack sementara, kita bisa kembali ke Beranda (index 0).
       return 0; // Tetap tampilkan Beranda di IndexedStack saat Q-RIS aktif
     } else if (bottomNavIndex == 3) {
-      // Riwayat (BNB index 3)
-      return 2; // -> _actualPageWidgets[2] (RiwayatPage)
+      return 2;
     } else if (bottomNavIndex == 4) {
-      // Favorit (BNB index 4)
-      return 3; // -> _actualPageWidgets[3] (FavoritPage)
+      return 3;
     }
-    return 0; // Fallback ke Beranda untuk indeks yang tidak terduga
+    return 0;
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        // IndexedStack menggunakan indeks yang sudah disesuaikan
         child: IndexedStack(
           index: _getPageIndexForIndexedStack(_selectedIndex),
           children: _actualPageWidgets,
@@ -70,21 +60,15 @@ class _HomepageScreenState extends State<HomepageScreen> {
         type: BottomNavigationBarType.fixed,
         selectedItemColor: const Color(0xFF7B2CBF),
         unselectedItemColor: Colors.grey,
-        currentIndex:
-            _selectedIndex, // currentIndex langsung menggunakan _selectedIndex
+        currentIndex: _selectedIndex,
         onTap: (index) {
-          // Selalu perbarui _selectedIndex sesuai dengan indeks yang ditekan
           setState(() {
             _selectedIndex = index;
           });
 
-          // Logika khusus untuk tombol Q-RIS (yang melakukan navigasi terpisah)
           if (index == 2) {
-            _navigateToQrisScanner(); // Navigasi ke halaman scanner
+            _navigateToQrisScanner();
           }
-          // Untuk tombol lain (Beranda, Kotak masuk, Riwayat, Favorit),
-          // _selectedIndex sudah diupdate di setState di atas, dan IndexedStack akan
-          // otomatis menampilkan halaman yang benar melalui _getPageIndexForIndexedStack.
         },
         items: [
           const BottomNavigationBarItem(
@@ -95,19 +79,18 @@ class _HomepageScreenState extends State<HomepageScreen> {
             icon: Icon(Icons.chat_bubble_outline),
             label: 'Kotak masuk',
           ),
-          // --- Custom Q-RIS Button ---
           BottomNavigationBarItem(
             icon: Transform.translate(
-              offset: const Offset(0, -15), // Menggeser ikon ke atas
+              offset: const Offset(0, -15),
               child: Container(
-                width: 60, // Lebar lingkaran diperbesar
-                height: 60, // Tinggi lingkaran diperbesar
+                width: 60,
+                height: 60,
                 decoration: const BoxDecoration(
-                  color: Color(0xFF7B2CBF), // Warna ungu
-                  shape: BoxShape.circle, // Bentuk lingkaran
+                  color: Color(0xFF7B2CBF),
+                  shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
-                      color: Color(0x40000000), // Bayangan untuk efek terangkat
+                      color: Color(0x40000000),
                       blurRadius: 10,
                       offset: Offset(0, 5),
                     ),
@@ -116,13 +99,12 @@ class _HomepageScreenState extends State<HomepageScreen> {
                 child: const Icon(
                   Icons.qr_code_scanner,
                   color: Colors.white,
-                  size: 35, // Ukuran ikon diperbesar
+                  size: 35,
                 ),
               ),
             ),
             label: 'Q-RIS',
           ),
-          // --- End Custom Q-RIS Button ---
           const BottomNavigationBarItem(
             icon: Icon(Icons.list_alt),
             label: 'Riwayat',
@@ -152,24 +134,15 @@ class _HomepageScreenState extends State<HomepageScreen> {
       print('Data QRIS dari scanner: $scannedData');
     }
 
-    // Penting: Setelah kembali dari scanner, kembalikan _selectedIndex ke Beranda (indeks 0)
-    // agar highlight BottomNavigationBar kembali ke Beranda.
     setState(() {
       _selectedIndex = 0;
     });
   }
 
   Widget _buildHomepageContent() {
-    GoogleMapController? contentMapController;
-    final CameraPosition contentKGooglePlex = CameraPosition(
-      target: _initialLocation,
-      zoom: 13.0,
-    );
-
-    Future<void> setMapStyle(GoogleMapController controller) async {
-      String style = await rootBundle.loadString('assets/map_style.json');
-      controller.setMapStyle(style);
-    }
+    // Hapus: GoogleMapController? contentMapController; // Tidak diperlukan lagi
+    // Hapus: final CameraPosition contentKGooglePlex = CameraPosition(...) // Tidak diperlukan lagi
+    // Hapus: Future<void> setMapStyle(...) // Tidak diperlukan lagi
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16.0),
@@ -225,22 +198,45 @@ class _HomepageScreenState extends State<HomepageScreen> {
               borderRadius: BorderRadius.circular(20),
               child: Stack(
                 children: [
-                  GoogleMap(
-                    mapType: MapType.normal,
-                    initialCameraPosition: contentKGooglePlex,
-                    onMapCreated: (GoogleMapController controller) {
-                      contentMapController = controller;
-                      setMapStyle(controller);
-                    },
-                    markers: {
-                      Marker(
-                        markerId: const MarkerId('initialLocation'),
-                        position: _initialLocation,
-                        icon: BitmapDescriptor.defaultMarkerWithHue(
-                          BitmapDescriptor.hueRed,
-                        ),
+                  // Ganti GoogleMap dengan FlutterMap
+                  FlutterMap(
+                    options: MapOptions(
+                      initialCenter: _initialLocation, // Pusat peta di Surabaya
+                      initialZoom: 13.0, // Zoom awal untuk peta mini
+                      // Anda bisa membatasi interaksi jika ini hanya peta mini
+                      // interactionOptions: const InteractionOptions(
+                      //   flags: InteractiveFlag.all & ~InteractiveFlag.rotate, // Contoh: disable rotasi
+                      // ),
+                      // Batas area yang bisa digulir
+                      // maxBounds parameter removed because it is not supported in MapOptions
+                    ),
+                    children: [
+                      TileLayer(
+                        urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                        userAgentPackageName: 'com.example.kakilima_app', // Pastikan sesuai package name Anda
                       ),
-                    },
+                      MarkerLayer(
+                        markers: [
+                          Marker(
+                            point: _initialLocation, // Marker di lokasi awal (Surabaya)
+                            width: 80.0,
+                            height: 80.0,
+                            child: const Icon(
+                              Icons.location_on,
+                              color: Colors.red,
+                              size: 40.0,
+                            ),
+                          ),
+                          // Anda bisa menambahkan marker lain di sini jika ada lokasi pedagang
+                          // Marker(
+                          //   point: LatLng(-7.2500, 112.7700), // Contoh pedagang lain
+                          //   width: 80,
+                          //   height: 80,
+                          //   child: Icon(Icons.store, color: Colors.blue, size: 30),
+                          // ),
+                        ],
+                      ),
+                    ],
                   ),
                   Positioned(
                     bottom: 10,
@@ -251,11 +247,9 @@ class _HomepageScreenState extends State<HomepageScreen> {
                         onPressed: () {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(
-                              builder:
-                                  (context) =>
-                                      FullMapScreen(center: _initialLocation),
-                            ),
+                            // Pastikan FullMapScreen sudah diupdate untuk menggunakan LatLng dari latlong2
+                            // dan tidak lagi menerima parameter 'center' jika Anda ingin selalu di Surabaya
+                            MaterialPageRoute(builder: (context) => FullMapScreen()), // Panggil tanpa 'center'
                           );
                         },
                         style: ElevatedButton.styleFrom(
@@ -316,10 +310,10 @@ class _HomepageScreenState extends State<HomepageScreen> {
                 ],
               ),
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Row(
+              child: const Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Row(
+                  Row(
                     children: [
                       Icon(Icons.wallet, color: Colors.white, size: 20),
                       SizedBox(width: 8),
@@ -330,7 +324,7 @@ class _HomepageScreenState extends State<HomepageScreen> {
                     ],
                   ),
                   Row(
-                    children: const [
+                    children: [
                       Text(
                         'Rp',
                         style: TextStyle(color: Colors.white, fontSize: 12),
